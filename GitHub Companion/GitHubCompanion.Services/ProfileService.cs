@@ -13,7 +13,9 @@ namespace GitHubCompanion.Services
                 client.DefaultRequestHeaders.Add("User-Agent", "Git-Hub-Companion");
                 HttpResponseMessage response = await client.GetAsync($"https://api.github.com/users/{username}");
                 response.EnsureSuccessStatusCode();
-                return await response.Content.ReadAsAsync<Profile>();
+                Profile profile = await response.Content.ReadAsAsync<Profile>();
+                profile.Headers = new Models.Headers.GitHubHeaders(response.Headers);
+                return profile;
             }
         }
     }
