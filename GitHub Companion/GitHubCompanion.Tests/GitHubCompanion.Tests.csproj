@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GitHubCompanion.Core\GitHubCompanion.Core.csproj" />
+    <ProjectReference Include="..\GitHubCompanion.Services\GitHubCompanion.Services.csproj" />
   </ItemGroup>
 
 </Project>
