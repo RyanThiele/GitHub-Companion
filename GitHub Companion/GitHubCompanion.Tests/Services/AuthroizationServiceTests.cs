@@ -9,7 +9,7 @@ namespace GitHubCompanion.Tests.Services
     public class AuthroizationServiceTests
     {
         [Theory]
-        [MemberData("AuthorizeTestData", MemberType = typeof(DataSource))]
+        [MemberData(nameof(DataSource.AuthorizeTestData), MemberType = typeof(DataSource))]
         public async Task CreateAuthorizations(int currentRow, string username, string password)
         {
             AuthorizationService service = new AuthorizationService();
