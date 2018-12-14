@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
-namespace GitHubCompanion.Uwp.Services.Local
+namespace GitHubCompanion.Uwp.LocalServices
 {
     class NavigationService : GitHubCompanion.Services.INavigationService
     {

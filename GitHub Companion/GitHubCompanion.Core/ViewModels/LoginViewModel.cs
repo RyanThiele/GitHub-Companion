@@ -11,6 +11,13 @@ namespace GitHubCompanion.ViewModels
     {
         private readonly ILogger _logger;
         private readonly IAuthorizationService _authorizationService;
+        private readonly ISettingsService _settingsService;
+
+        public enum Modes
+        {
+            Login,
+            AuthenticationCode
+        }
 
 
         #region Constructors
@@ -32,6 +39,17 @@ namespace GitHubCompanion.ViewModels
         #endregion Messages
 
         #region Properties
+
+        #region CurrentMode
+
+        private Modes _CurrentMode;
+        public Modes CurrentMode
+        {
+            get { return _CurrentMode; }
+            set { _CurrentMode = value; OnPropertyChanged(); }
+        }
+
+        #endregion CurrentMode
 
         #region Username
 
@@ -66,6 +84,17 @@ namespace GitHubCompanion.ViewModels
 
         #endregion SecurePassword
 
+        #region AuthenticationCode
+
+        private string _AuthenticationCode;
+        public string AuthenticationCode
+        {
+            get { return _AuthenticationCode; }
+            set { _AuthenticationCode = value; OnPropertyChanged(); LoginCommand.OnCanExecuteChanged(); }
+        }
+
+        #endregion AuthenticationCode
+
         #endregion Properties
 
         #region Commands
@@ -84,18 +113,36 @@ namespace GitHubCompanion.ViewModels
 
         protected virtual async void LoginExecute()
         {
-            await PerformLoginAsync();
+            switch (CurrentMode)
+            {
+                case Modes.Login:
+                    await PerformLoginAsync();
+                    break;
+                case Modes.AuthenticationCode:
+                    break;
+            }
         }
 
         protected virtual bool CanLoginExecute()
         {
 
             string password = null;
-            if (SecurePassword != null && SecurePassword.Length > 0) password = ConvertToUnsecureString(SecurePassword);
+            if (SecurePassword != null && SecurePassword.Length > 0) password = SecurePassword.ConvertToUnsecureString();
             if (!String.IsNullOrWhiteSpace(Password)) password = Password;
 
-            bool isValid = !String.IsNullOrWhiteSpace(Username) && !String.IsNullOrWhiteSpace(password);
-            return isValid;
+            bool isUsernameValid = !String.IsNullOrWhiteSpace(Username);
+            bool isPasswordValid = !String.IsNullOrWhiteSpace(password);
+            bool isAuthenticationCodeValid = !String.IsNullOrWhiteSpace(AuthenticationCode);
+
+            switch (CurrentMode)
+            {
+                case Modes.Login:
+                    return isUsernameValid & isPasswordValid;
+                case Modes.AuthenticationCode:
+                    return isAuthenticationCodeValid;
+                default:
+                    return false;
+            }
         }
 
         #endregion Login
@@ -125,33 +172,26 @@ namespace GitHubCompanion.ViewModels
 
         #region Methods
 
-        private string ConvertToUnsecureString(System.Security.SecureString securePassword)
-        {
-            if (securePassword == null)
-            {
-                return string.Empty;
-            }
-
-            IntPtr unmanagedString = IntPtr.Zero;
-            try
-            {
-                unmanagedString = System.Runtime.InteropServices.Marshal.SecureStringToGlobalAllocUnicode(securePassword);
-                return System.Runtime.InteropServices.Marshal.PtrToStringUni(unmanagedString);
-            }
-            finally
-            {
-                System.Runtime.InteropServices.Marshal.ZeroFreeGlobalAllocUnicode(unmanagedString);
-            }
-        }
 
         private Task PerformLoginAsync()
         {
+
             string password = null;
-            if (SecurePassword != null && SecurePassword.Length > 0) password = ConvertToUnsecureString(SecurePassword);
+            if (SecurePassword != null && SecurePassword.Length > 0) password = SecurePassword.ConvertToUnsecureString();
             if (!String.IsNullOrWhiteSpace(Password)) password = Password;
 
             return Task.CompletedTask;
         }
+
+        private Task PerformLoginWithAuthenticationCodeAsync()
+        {
+            string password = null;
+            if (SecurePassword != null && SecurePassword.Length > 0) password = SecurePassword.ConvertToUnsecureString();
+            if (!String.IsNullOrWhiteSpace(Password)) password = Password;
+
+            return Task.CompletedTask;
+        }
+
 
         #endregion Methods
 

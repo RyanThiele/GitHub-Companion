@@ -6,16 +6,42 @@ namespace GitHubCompanion.Services
 {
     public class ProfileService : IProfileService
     {
-        public async Task<Profile> GetUserProfileAsync(string username)
+
+        public async Task<GitHubResponse<Profile>> GetSelfProfileAsync(string token)
         {
+            GitHubResponse<Profile> result = new GitHubResponse<Profile>();
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("User-Agent", "Git-Hub-Companion");
+                HttpResponseMessage response = await client.GetAsync($"https://api.github.com/user");
+                result.Headers = new Models.Headers.GitHubHeaders(response.Headers);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    result.Response = await response.Content.ReadAsAsync<Profile>();
+                }
+
+                return result;
+            }
+        }
+
+        public async Task<GitHubResponse<Profile>> GetUserProfileAsync(string username)
+        {
+            GitHubResponse<Profile> result = new GitHubResponse<Profile>();
+
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("User-Agent", "Git-Hub-Companion");
                 HttpResponseMessage response = await client.GetAsync($"https://api.github.com/users/{username}");
-                response.EnsureSuccessStatusCode();
-                Profile profile = await response.Content.ReadAsAsync<Profile>();
-                profile.Headers = new Models.Headers.GitHubHeaders(response.Headers);
-                return profile;
+                result.Headers = new Models.Headers.GitHubHeaders(response.Headers);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    result.Response = await response.Content.ReadAsAsync<Profile>();
+                }
+
+                return result;
             }
         }
     }
