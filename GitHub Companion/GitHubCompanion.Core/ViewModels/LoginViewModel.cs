@@ -1,5 +1,6 @@
 ﻿using Dynamensions.Infrastructure.Base;
 using Dynamensions.Input.Commands;
+using GitHubCompanion.Models;
 using GitHubCompanion.Services;
 using Microsoft.Extensions.Logging;
 using System;
@@ -10,13 +11,15 @@ namespace GitHubCompanion.ViewModels
     public class LoginViewModel : ViewModelBase
     {
         private readonly ILogger _logger;
+        private readonly INavigationService _navigationService;
         private readonly IAuthorizationService _authorizationService;
         private readonly ISettingsService _settingsService;
 
         public enum Modes
         {
             Login,
-            AuthenticationCode
+            AuthenticationCode,
+            Failure
         }
 
 
@@ -27,10 +30,15 @@ namespace GitHubCompanion.ViewModels
 
         }
 
-        public LoginViewModel(ILogger<LoginViewModel> logger, IAuthorizationService authorizationService)
+        public LoginViewModel(ILogger<LoginViewModel> logger,
+            INavigationService navigationService,
+            IAuthorizationService authorizationService,
+            ISettingsService settingsService)
         {
             _logger = logger;
+            _navigationService = navigationService;
             _authorizationService = authorizationService;
+            _settingsService = settingsService;
         }
 
         #endregion Constructors
@@ -94,6 +102,17 @@ namespace GitHubCompanion.ViewModels
         }
 
         #endregion AuthenticationCode
+
+        #region IsAuthenticationCodeRequired
+
+        private bool _IsAuthenticationCodeRequired;
+        public bool IsAuthenticationCodeRequired
+        {
+            get { return _IsAuthenticationCodeRequired; }
+            set { _IsAuthenticationCodeRequired = value; OnPropertyChanged(); }
+        }
+
+        #endregion IsAuthenticationCodeRequired
 
         #endregion Properties
 
@@ -173,14 +192,62 @@ namespace GitHubCompanion.ViewModels
         #region Methods
 
 
-        private Task PerformLoginAsync()
+        private async Task PerformLoginAsync()
         {
 
             string password = null;
             if (SecurePassword != null && SecurePassword.Length > 0) password = SecurePassword.ConvertToUnsecureString();
             if (!String.IsNullOrWhiteSpace(Password)) password = Password;
 
-            return Task.CompletedTask;
+            Status = "Attempting to authenticate...";
+            _logger.LogInformation("Attempting to authenticate...");
+            AuthenticationResult authenticationResult = await _authorizationService.AuthenticateAsync(Username, password, AuthenticationCode);
+
+            // Authentication passed, move to home page.
+            if (authenticationResult.AuthentictionSuccessful)
+            {
+                Status = "Authentication was successful.";
+                _logger.LogInformation("Authentication was successful.");
+                await Task.Delay(1000);
+
+                _logger.LogInformation("Navigating to Home.");
+                await _navigationService.NavigateToAsync<HomeViewModel>(addtoStack: false);
+                return;
+            }
+
+            // Authentication failed. 
+            _logger.LogInformation("Authentication Failed.");
+
+            // Does it have two-factor authentication?
+            if (authenticationResult.OptionHeader.IsRequired)
+            {
+                IsAuthenticationCodeRequired = true;
+
+                _logger.LogInformation($"Authentication requires TFA via {authenticationResult.OptionHeader.Type}.");
+                switch (authenticationResult.OptionHeader.Type)
+                {
+                    case Models.Headers.GitHubOptionHeaderType.Unknown:
+                        Status = "Your GitHub account requires a two factor authentication code that is not currently supported.";
+                        CurrentMode = Modes.Failure;
+                        break;
+                    case Models.Headers.GitHubOptionHeaderType.SMS:
+                        Status = "Your GitHub account requires a two factor authentication code from your phone.";
+                        CurrentMode = Modes.AuthenticationCode;
+                        break;
+                    case Models.Headers.GitHubOptionHeaderType.AuthenticatorApp:
+                        Status = "Your GitHub account requires a two factor authentication code from your Authenticator App.";
+                        CurrentMode = Modes.AuthenticationCode;
+                        break;
+                }
+
+                return;
+            }
+
+            // If we get here, all options were exhausted. 
+            // Either the user did not enter the correct credentials, 
+            // or there is an unknown problem with their account.
+            CurrentMode = Modes.Failure;
+            Status = "Could not authenticate with GitHub. Please be sure you have valid credentials, and that there is nothing wrong with your GitHub account.";
         }
 
         private Task PerformLoginWithAuthenticationCodeAsync()

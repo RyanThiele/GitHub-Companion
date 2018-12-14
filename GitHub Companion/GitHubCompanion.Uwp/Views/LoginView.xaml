@@ -5,14 +5,16 @@
     xmlns:local="using:GitHubCompanion.Uwp.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:controls="using:GitHubCompanion.Uwp.Contorls"
+    xmlns:viewModels="using:GitHubCompanion.ViewModels"
+    xmlns:controls="using:GitHubCompanion.Uwp.Controls"
     mc:Ignorable="d"
+    d:DataContext="{Binding Source={d:DesignInstance Type=viewModels:LoginViewModel, IsDesignTimeCreatable=True}}"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Border BorderBrush="{ThemeResource ButtonBorderThemeBrush}" 
             BorderThickness="1" 
             HorizontalAlignment="Center" VerticalAlignment="Center" 
-            Width="300" Height="300" CornerRadius="10" Padding="20">
+            Width="300" Height="350" CornerRadius="10" Padding="20">
         <Border.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="Transparent" />
@@ -24,7 +26,23 @@
                 <RowDefinition Height="2*"/>
                 <RowDefinition />
             </Grid.RowDefinitions>
-        
+
+            <StackPanel>
+                <TextBlock Text="Username:" />
+                <TextBox x:Name="UsernameTextBox" Text="{Binding Path=Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Text="Password:" />
+                <PasswordBox x:Name="PasswordTextBox" PasswordRevealMode="Peek" Password="{Binding Path=Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <StackPanel Visibility="{Binding IsAuthenticationCodeRequired}">
+                    <TextBlock Text="Authentication Code:" />
+                    <TextBox Text="{Binding Path=AuthenticationCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                </StackPanel>
+
+                <Button x:Name="Login" HorizontalAlignment="Stretch" Content="Login" Command="{Binding Path=LoginCommand}" />
+            </StackPanel>
+
             <controls:GitHubMark Grid.Row="1" Width="100" Height="100" Opacity="0.7" />
 
         </Grid>

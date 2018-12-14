@@ -35,6 +35,7 @@ namespace GitHubCompanion.Uwp
             serviceDescriptors.AddSingleton<ISettingsService, LocalServices.SettingsService>();
             serviceDescriptors.AddSingleton<INavigationService, LocalServices.NavigationService>();
             serviceDescriptors.AddSingleton<IAuthorizationService, AuthorizationService>();
+            serviceDescriptors.AddSingleton<IProfileService, ProfileService>();
 
             // ViewModels
             serviceDescriptors.AddTransient<HomeViewModel>();

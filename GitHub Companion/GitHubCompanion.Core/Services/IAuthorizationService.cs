@@ -51,6 +51,18 @@ namespace GitHubCompanion.Services
 
     public interface IAuthorizationService
     {
+        /// <summary>
+        /// Authenticate with the API.
+        /// </summary>
+        /// <param name="username">Required. The username for the authorization.</param>
+        /// <param name="password">Required. And unencrypted string that contains the password.</param>
+        /// <param name="tfaCode">
+        /// Optional. The Two factor authentication code. 
+        /// If the two factor authentication code is unknown, leave blank, and the result to have two factor flag with the method.
+        /// </param>
+        /// <returns>The result of the authentication request.</returns>
+        Task<AuthenticationResult> AuthenticateAsync(string username, string password, string tfaCode = null);
+
         Task<bool> AuthorizeWithTokenAsync(string token);
         /// <summary>
         /// Creates authorizations for a user.

@@ -41,7 +41,7 @@ namespace GitHubCompanion.Uwp.LocalServices
             viewName = $"GitHubCompanion.Uwp.Views.{viewName}";
             //viewName = Assembly.CreateQualifiedName(typeof(NavigationService).Assembly.GetName().Name, viewName);
             Type viewType = Type.GetType(viewName);
-
+        
             // get the root frame.
             Frame rootFrame = Window.Current.Content as Frame;
 
