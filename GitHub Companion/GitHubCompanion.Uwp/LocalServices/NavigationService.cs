@@ -11,6 +11,49 @@ namespace GitHubCompanion.Uwp.LocalServices
     class NavigationService : GitHubCompanion.Services.INavigationService
     {
         private readonly List<Type> _stack = new List<Type>();
+        private Type _currentViewModelType = null;
+        private Frame _rootFrame = new Frame();
+
+        public NavigationService()
+        {
+            _rootFrame.Navigated += _rootFrame_Navigated;
+            _rootFrame.Navigating += _rootFrame_Navigating;
+            _rootFrame.NavigationFailed += _rootFrame_NavigationFailed;
+            Window.Current.Content = _rootFrame;
+        }
+
+        private void _rootFrame_NavigationStopped(object sender, Windows.UI.Xaml.Navigation.NavigationEventArgs e)
+        {
+            if (e.Content == null) return;
+            Page view = e.Content as Page;
+            ViewModelBase viewModel = view.DataContext as ViewModelBase;
+            viewModel.Dispose();
+        }
+
+        private void _rootFrame_NavigationFailed(object sender, Windows.UI.Xaml.Navigation.NavigationFailedEventArgs e)
+        {
+            _stack.RemoveAt(_stack.Count - 1);
+            throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+        }
+
+        private void _rootFrame_Navigating(object sender, Windows.UI.Xaml.Navigation.NavigatingCancelEventArgs e)
+        {
+            if (_rootFrame.Content != null)
+            {
+                Page view = _rootFrame.Content as Page;
+                ViewModelBase viewModel = view.DataContext as ViewModelBase;
+                viewModel.Dispose();
+                _rootFrame.Content = null;
+            }
+        }
+
+        private void _rootFrame_Navigated(object sender, Windows.UI.Xaml.Navigation.NavigationEventArgs e)
+        {
+            var viewModel = (Application.Current as App).ServiceProvider.GetRequiredService(_currentViewModelType) as ViewModelBase;
+            var page = e.Content as Page;
+            page.Loaded += (s, ev) => { viewModel.PrepareViewModelAsync(); };
+            page.DataContext = viewModel;
+        }
 
         public async Task NavigateBackAsync(object parameter = null)
         {
@@ -33,7 +76,7 @@ namespace GitHubCompanion.Uwp.LocalServices
 
         private void PerformNavigation(Type viewModelType, object parameter, bool addtoStack)
         {
-
+            _currentViewModelType = viewModelType;
             // get the name of the view model from the type.
             string viewModelName = viewModelType.Name;
             // remove the ViewModel from the name.
@@ -41,45 +84,15 @@ namespace GitHubCompanion.Uwp.LocalServices
             viewName = $"GitHubCompanion.Uwp.Views.{viewName}";
             //viewName = Assembly.CreateQualifiedName(typeof(NavigationService).Assembly.GetName().Name, viewName);
             Type viewType = Type.GetType(viewName);
-        
-            // get the root frame.
-            Frame rootFrame = Window.Current.Content as Frame;
-
-            if (rootFrame == null)
-            {
-                // Create a Frame to act as the navigation context and navigate to the first page
-                rootFrame = new Frame();
-
-                // if navigation fails, throw an exception.
-                rootFrame.NavigationFailed += (s, e) =>
-                {
-                    _stack.RemoveAt(_stack.Count - 1);
-                    throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
-                };
-
-                // if navigation succeeds, attach the view model, and execute prepare method.
-                rootFrame.Navigated += async (s, e) =>
-                {
-                    var viewModel = (Application.Current as App).ServiceProvider.GetRequiredService(viewModelType) as ViewModelBase;
-                    var page = e.Content as Page;
-                    page.DataContext = viewModel;
-                    await viewModel.PrepareViewModelAsync();
-                };
-
-                // Place the frame in the current Window
-                Window.Current.Content = rootFrame;
-            }
-
 
             // perform navigation
             if (parameter != null)
-                rootFrame.Navigate(viewType);
+                _rootFrame.Navigate(viewType);
             else
-                rootFrame.Navigate(viewType);
+                _rootFrame.Navigate(viewType);
 
             if (addtoStack) _stack.Add(viewModelType);
             Window.Current.Activate();
-
         }
 
     }

@@ -14,7 +14,7 @@
     <Border BorderBrush="{ThemeResource ButtonBorderThemeBrush}" 
             BorderThickness="1" 
             HorizontalAlignment="Center" VerticalAlignment="Center" 
-            Width="300" Height="350" CornerRadius="10" Padding="20">
+            Width="400" Height="400" CornerRadius="10" Padding="20">
         <Border.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="Transparent" />
@@ -29,18 +29,18 @@
 
             <StackPanel>
                 <TextBlock Text="Username:" />
-                <TextBox x:Name="UsernameTextBox" Text="{Binding Path=Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox x:Name="UsernameTextBox" PlaceholderText="Enter you username." Text="{Binding Path=Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                 <TextBlock Text="Password:" />
-                <PasswordBox x:Name="PasswordTextBox" PasswordRevealMode="Peek" Password="{Binding Path=Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <PasswordBox x:Name="PasswordTextBox" PlaceholderText="Enter your password." PasswordRevealMode="Peek" Password="{Binding Path=Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                 <StackPanel Visibility="{Binding IsAuthenticationCodeRequired}">
                     <TextBlock Text="Authentication Code:" />
-                    <TextBox Text="{Binding Path=AuthenticationCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
+                    <TextBox PlaceholderText="Enter your authentication code." Text="{Binding Path=AuthenticationCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
 
                 <Button x:Name="Login" HorizontalAlignment="Stretch" Content="Login" Command="{Binding Path=LoginCommand}" />
+                <TextBlock Text="{Binding Status}" TextWrapping="Wrap" Margin="0,10" />
             </StackPanel>
 
             <controls:GitHubMark Grid.Row="1" Width="100" Height="100" Opacity="0.7" />

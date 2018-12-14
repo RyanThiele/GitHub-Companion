@@ -132,14 +132,8 @@ namespace GitHubCompanion.ViewModels
 
         protected virtual async void LoginExecute()
         {
-            switch (CurrentMode)
-            {
-                case Modes.Login:
                     await PerformLoginAsync();
-                    break;
-                case Modes.AuthenticationCode:
-                    break;
-            }
+            
         }
 
         protected virtual bool CanLoginExecute()
@@ -153,12 +147,16 @@ namespace GitHubCompanion.ViewModels
             bool isPasswordValid = !String.IsNullOrWhiteSpace(password);
             bool isAuthenticationCodeValid = !String.IsNullOrWhiteSpace(AuthenticationCode);
 
+            if (IsAuthenticationCodeRequired)
+                return isAuthenticationCodeValid;
+            else
+                return isUsernameValid & isPasswordValid;
+
+
             switch (CurrentMode)
             {
                 case Modes.Login:
-                    return isUsernameValid & isPasswordValid;
                 case Modes.AuthenticationCode:
-                    return isAuthenticationCodeValid;
                 default:
                     return false;
             }
@@ -219,7 +217,7 @@ namespace GitHubCompanion.ViewModels
             _logger.LogInformation("Authentication Failed.");
 
             // Does it have two-factor authentication?
-            if (authenticationResult.OptionHeader.IsRequired)
+            if (authenticationResult.OptionHeader != null && authenticationResult.OptionHeader.IsRequired)
             {
                 IsAuthenticationCodeRequired = true;
 

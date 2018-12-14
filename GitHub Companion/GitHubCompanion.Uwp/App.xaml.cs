@@ -29,7 +29,8 @@ namespace GitHubCompanion.Uwp
             ServiceCollection serviceDescriptors = new ServiceCollection();
 
             // logging
-            serviceDescriptors.AddLogging(x => x.SetMinimumLevel(LogLevel.Debug));
+            serviceDescriptors.AddLogging(x => x.SetMinimumLevel(LogLevel.Debug).AddDebug());
+
 
             // services
             serviceDescriptors.AddSingleton<ISettingsService, LocalServices.SettingsService>();

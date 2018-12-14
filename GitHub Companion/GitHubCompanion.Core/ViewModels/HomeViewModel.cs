@@ -9,9 +9,9 @@ namespace GitHubCompanion.ViewModels
     public class HomeViewModel : ViewModelBase
     {
         private readonly ILogger _logger;
-        private readonly ISettingsService settingsService;
-        private readonly IProfileService _profileService;
         private readonly INavigationService _navigationService;
+        private readonly ISettingsService _settingsService;
+        private readonly IProfileService _profileService;
 
         #region Constructors
 
@@ -20,9 +20,14 @@ namespace GitHubCompanion.ViewModels
             // empty constructor to use with visual designer.
         }
 
-        public HomeViewModel(ILogger logger, IProfileService profileService)
+        public HomeViewModel(ILogger<HomeViewModel> logger,
+            INavigationService navigationService,
+            ISettingsService settingsService,
+            IProfileService profileService)
         {
             _logger = logger;
+            _navigationService = navigationService;
+            _settingsService = settingsService;
             _profileService = profileService;
         }
 
@@ -45,7 +50,7 @@ namespace GitHubCompanion.ViewModels
             {
                 // check to see if we have a token.
                 _logger.LogDebug("Getting token...");
-                string token = await settingsService.GetTokenAsync();
+                string token = await _settingsService.GetTokenAsync();
                 if (String.IsNullOrWhiteSpace(token))
                 {
                     _logger.LogError("No token available.");
