@@ -20,11 +20,10 @@ Currently there is a validation in place using Azure pipelines (continuous integ
 ### Schedule builds
 After there is a foothold on the projects, there will be two more pipelines in place - a scheduled build (depending on the frequency of the updates/additions), and a release pipeline that will release the project into the wild blue yonder.
 
-## Contribute
+## Contributing
 ### Setup
 There will be some data files that XUnit is using to test the service methods. All sensitive data files will have an extension of cvsd (*.cvsd). There is an entry in the gotnore file to ignore these extensions. Please use *.cvsd extensions when dealing with sensitive data (usernames, passwords, etc...).
 
-## Contributing
 ### Branching
 Currently there is a rule to protect the master branch. All changes and bug fixes must go through a pull request process. So be sure to branch from the master before pushing changes to the repository.
 
