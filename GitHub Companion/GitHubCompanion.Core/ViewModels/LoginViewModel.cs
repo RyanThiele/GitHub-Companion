@@ -48,17 +48,6 @@ namespace GitHubCompanion.ViewModels
 
         #region Properties
 
-        #region CurrentMode
-
-        private Modes _CurrentMode;
-        public Modes CurrentMode
-        {
-            get { return _CurrentMode; }
-            set { _CurrentMode = value; OnPropertyChanged(); }
-        }
-
-        #endregion CurrentMode
-
         #region Username
 
         private string _Username;
@@ -132,8 +121,8 @@ namespace GitHubCompanion.ViewModels
 
         protected virtual async void LoginExecute()
         {
-                    await PerformLoginAsync();
-            
+            await PerformLoginAsync();
+
         }
 
         protected virtual bool CanLoginExecute()
@@ -152,14 +141,6 @@ namespace GitHubCompanion.ViewModels
             else
                 return isUsernameValid & isPasswordValid;
 
-
-            switch (CurrentMode)
-            {
-                case Modes.Login:
-                case Modes.AuthenticationCode:
-                default:
-                    return false;
-            }
         }
 
         #endregion Login
@@ -226,15 +207,12 @@ namespace GitHubCompanion.ViewModels
                 {
                     case Models.Headers.GitHubOptionHeaderType.Unknown:
                         Status = "Your GitHub account requires a two factor authentication code that is not currently supported.";
-                        CurrentMode = Modes.Failure;
                         break;
                     case Models.Headers.GitHubOptionHeaderType.SMS:
                         Status = "Your GitHub account requires a two factor authentication code from your phone.";
-                        CurrentMode = Modes.AuthenticationCode;
                         break;
                     case Models.Headers.GitHubOptionHeaderType.AuthenticatorApp:
                         Status = "Your GitHub account requires a two factor authentication code from your Authenticator App.";
-                        CurrentMode = Modes.AuthenticationCode;
                         break;
                 }
 
@@ -244,7 +222,6 @@ namespace GitHubCompanion.ViewModels
             // If we get here, all options were exhausted. 
             // Either the user did not enter the correct credentials, 
             // or there is an unknown problem with their account.
-            CurrentMode = Modes.Failure;
             Status = "Could not authenticate with GitHub. Please be sure you have valid credentials, and that there is nothing wrong with your GitHub account.";
         }
 
