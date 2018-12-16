@@ -11,8 +11,9 @@ namespace GitHubCompanion.Tests.Services
         public async Task GetUserProfileTest()
         {
             ProfileService service = new ProfileService();
-            Profile profile = await service.GetUserProfileAsync("RyanThiele");
-            Assert.NotNull(profile);
+            GitHubResponse<Profile> response = await service.GetUserProfileAsync("RyanThiele");
+            Assert.NotNull(response);
+            Assert.NotNull(response.Response);
         }
     }
 }
