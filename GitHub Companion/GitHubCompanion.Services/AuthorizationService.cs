@@ -6,18 +6,17 @@ using System.Threading.Tasks;
 
 namespace GitHubCompanion.Services
 {
-    public class AuthorizationService : IAuthorizationService
+    public class AuthorizationService : GitHubServiceV3Base, IAuthorizationService
     {
         public async Task<AuthenticationResult> AuthenticateAsync(string username, string password, string tfaCode)
         {
             AuthenticationResult result = new AuthenticationResult();
 
-            using (HttpClient client = new HttpClient())
+            using (HttpClient client = CreateHttpClient())
             {
                 // create a basic auth header.
                 byte[] authroizationHeader = Encoding.ASCII.GetBytes($"{username}:{password}");
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(authroizationHeader));
-                client.DefaultRequestHeaders.Add("User-Agent", "Git-Hub-Companion");
 
                 // do we have a tfa code?
                 if (!String.IsNullOrWhiteSpace(tfaCode)) client.DefaultRequestHeaders.Add("X-GitHub-OTP", tfaCode);
@@ -40,12 +39,11 @@ namespace GitHubCompanion.Services
         {
             GitHubResponse<Authorization> response = new GitHubResponse<Authorization>();
 
-            using (HttpClient client = new HttpClient())
+            using (HttpClient client = CreateHttpClient())
             {
                 // create a basic auth header.
                 byte[] authroizationHeader = Encoding.ASCII.GetBytes($"{username}:{password}");
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(authroizationHeader));
-                client.DefaultRequestHeaders.Add("User-Agent", "Git-Hub-Companion");
 
                 if (TwoFactorAuthorizationCode.HasValue) client.DefaultRequestHeaders.Add("X-GitHub-OTP", TwoFactorAuthorizationCode.Value.ToString());
 

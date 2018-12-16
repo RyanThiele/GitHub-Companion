@@ -10,11 +10,11 @@
     mc:Ignorable="d"
     d:DataContext="{Binding Source={d:DesignInstance Type=viewModels:LoginViewModel, IsDesignTimeCreatable=True}}"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+    
     <Border BorderBrush="{ThemeResource ButtonBorderThemeBrush}" 
             BorderThickness="1" 
             HorizontalAlignment="Center" VerticalAlignment="Center" 
-            Width="400" Height="400" CornerRadius="10" Padding="20">
+            Width="400" Height="480" CornerRadius="10" Padding="20">
         <Border.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="Transparent" />
@@ -28,6 +28,12 @@
             </Grid.RowDefinitions>
 
             <StackPanel>
+                <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}">Log on using credentials</TextBlock>
+                <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Margin="0,5">
+                    Enter your credentials to log on to GitHub. 
+                    After you successfully log on, the application you will be create a personal access token.
+                    The token will be used instead of your credentials to communicate with GitHub's API.
+                </TextBlock>
                 <TextBlock Text="Username:" />
                 <TextBox x:Name="UsernameTextBox" PlaceholderText="Enter you username." Text="{Binding Path=Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
@@ -39,11 +45,17 @@
                     <TextBox PlaceholderText="Enter your authentication code." Text="{Binding Path=AuthenticationCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
 
-                <Button x:Name="Login" HorizontalAlignment="Stretch" Content="Login" Command="{Binding Path=LoginCommand}" />
+                <Button HorizontalAlignment="Stretch" Content="Login" Style="{ThemeResource AccentButtonStyle}" Command="{Binding Path=LoginCommand}">
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Enter" />
+                    </Button.KeyboardAccelerators>
+                </Button>
                 <TextBlock Text="{Binding Status}" TextWrapping="Wrap" Margin="0,10" />
             </StackPanel>
-
-            <controls:GitHubMark Grid.Row="1" Width="100" Height="100" Opacity="0.7" />
+            <StackPanel Grid.Row="1" VerticalAlignment="Bottom">
+                <controls:GitHubMark Grid.Row="1" Width="100" Height="100" Opacity="0.7" />
+                <Button Content="I have a personal token I would like to use." HorizontalAlignment="Stretch"/>
+            </StackPanel>
 
         </Grid>
     </Border>

@@ -4,16 +4,15 @@ using System.Threading.Tasks;
 
 namespace GitHubCompanion.Services
 {
-    public class ProfileService : IProfileService
+    public class ProfileService : GitHubServiceV3Base, IProfileService
     {
 
         public async Task<GitHubResponse<Profile>> GetSelfProfileAsync(string token)
         {
             GitHubResponse<Profile> result = new GitHubResponse<Profile>();
 
-            using (HttpClient client = new HttpClient())
+            using (HttpClient client = CreateHttpClient())
             {
-                client.DefaultRequestHeaders.Add("User-Agent", "Git-Hub-Companion");
                 HttpResponseMessage response = await client.GetAsync($"https://api.github.com/user");
                 result.Headers = new Models.Headers.GitHubHeaders(response.Headers);
 

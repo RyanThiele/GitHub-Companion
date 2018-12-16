@@ -60,6 +60,7 @@ namespace GitHubCompanion.Services
         /// Optional. The Two factor authentication code. 
         /// If the two factor authentication code is unknown, leave blank, and the result to have two factor flag with the method.
         /// </param>
+        /// <param name="cancellationToken">The cancellation token of the call.</param>
         /// <returns>The result of the authentication request.</returns>
         Task<AuthenticationResult> AuthenticateAsync(string username, string password, string tfaCode = null);
 
@@ -74,6 +75,7 @@ namespace GitHubCompanion.Services
         /// If the two factor authentication code is unknown, leave blank, and the result to have two factor flag with the method.
         /// </param>
         /// <param name="parameters">Optional. The parameters for the authorization. Defaults to user and repos.</param>
+        /// <
         /// <returns></returns>
         Task<GitHubResponse<Authorization>> CreateAuthorizationAsync(string username, string password, int? TwoFactorAuthorizationCode = null, AuthorizeParameters parameters = null);
 
