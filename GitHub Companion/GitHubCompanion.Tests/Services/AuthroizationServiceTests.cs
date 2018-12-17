@@ -8,7 +8,7 @@ namespace GitHubCompanion.Tests.Services
 {
     public class AuthroizationServiceTests
     {
-        [Theory]
+        [Theory(Skip = "Integration tests are not supported in automated build. PLease run manually.")]
         [MemberData(nameof(DataSource.AuthorizeTestData), MemberType = typeof(DataSource))]
         public async Task CreateAuthorizations(int currentRow, string username, string password)
         {
