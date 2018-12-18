@@ -15,6 +15,25 @@ namespace GitHubCompanion.Services
         /// Gets the token used for authenticated calls to the API.
         /// </summary>
         /// <returns>A token string, if one exists.</returns>
+        Task<string> GetPersonalAccessTokenAsync();
+
+        /// <summary>
+        /// Sets the token used for authenticated calls to the API.
+        /// </summary>
+        /// <returns>True is set was successful; Otherwise, false.</returns>
+        /// <param name="token">The token to set.</param>
+        Task<bool> SetPersonalAccessTokenAsync(string personalAccessToken);
+
+        /// <summary>
+        /// Clears/Resets the token used for authenticated calls to the API.
+        /// </summary>
+        /// <returns>True is set was successful; Otherwise, false.</returns>
+        Task<bool> ClearPersonalAccessTokenAsync();
+
+        /// <summary>
+        /// Gets the token used for authenticated calls to the API.
+        /// </summary>
+        /// <returns>A token string, if one exists.</returns>
         Task<string> GetTokenAsync();
 
         /// <summary>

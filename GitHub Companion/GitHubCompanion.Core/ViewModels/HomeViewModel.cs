@@ -76,9 +76,9 @@ namespace GitHubCompanion.ViewModels
             }
         }
 
-        protected virtual void LoginWithCredentialsExecute()
+        protected async virtual void LoginWithCredentialsExecute()
         {
-            // logic when the command is executed.
+            await _navigationService.NavigateToAsync<LoginWithCredentialsViewModel>(addtoStack: false);
         }
 
         protected virtual bool CanLoginWithCredentialsExecute() { return !IsAuthenticated; }
@@ -135,40 +135,77 @@ namespace GitHubCompanion.ViewModels
         {
             try
             {
-                // check to see if we have a token.
-                _logger.LogDebug("Getting token...");
-                string token = await _settingsService.GetTokenAsync();
-                if (String.IsNullOrWhiteSpace(token))
-                {
-                    _logger.LogError("No token available.");
-                    IsAuthenticated = false;
-                    return;
-                }
-
-                // token is available, attempt to log in with it.
-                _logger.LogInformation("Token available. Attempting to login...");
-                Status = "Token available. Logging in...";
-                AuthenticationResult tokenResult = await _authorizationService.AuthenticateWithTokenAsync(token);
-                if (!tokenResult.AuthenticationSuccessful)
-                {
-                    // token was invalid
-                    _logger.LogInformation("Token was invalid.");
-                    _IsAuthenticated = false;
-
-                    // clear token.
-                    _logger.LogInformation("Clearing Token...");
-                    await _settingsService.ClearTokenAsync();
-                    return;
-                }
-
-                // if we get to here, everything is valid. 
-                IsAuthenticated = true;
+                IsAuthenticated = await PerformAuthenticateWithTokenAsync();
+                if (!IsAuthenticated) await PerformAuthenticateWithPersonalAccessTokenAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error preparing view model");
             }
         }
+
+        private async Task<bool> PerformAuthenticateWithTokenAsync()
+        {
+            // check to see if we have a token.
+            _logger.LogDebug("Getting token...");
+            string token = await _settingsService.GetTokenAsync();
+            if (String.IsNullOrWhiteSpace(token))
+            {
+                _logger.LogError("No token available.");
+                IsAuthenticated = false;
+                return false;
+            }
+
+            // token is available, attempt to log in with it.
+            _logger.LogInformation("Token available. Attempting to login...");
+            Status = "Token available. Logging in...";
+            AuthenticationResult tokenResult = await _authorizationService.AuthenticateWithTokenAsync(token);
+            if (!tokenResult.AuthenticationSuccessful)
+            {
+                // token was invalid
+                _logger.LogInformation("Token was invalid.");
+                _IsAuthenticated = false;
+
+                // clear token.
+                _logger.LogInformation("Clearing Token...");
+                await _settingsService.ClearTokenAsync();
+                return false;
+            }
+
+            return true;
+        }
+
+        private async Task<bool> PerformAuthenticateWithPersonalAccessTokenAsync()
+        {
+            // check to see if we have a token.
+            _logger.LogDebug("Getting pesonal access token...");
+            string token = await _settingsService.GetPersonalAccessTokenAsync();
+            if (String.IsNullOrWhiteSpace(token))
+            {
+                _logger.LogError("No personal token available.");
+                IsAuthenticated = false;
+                return false;
+            }
+
+            // token is available, attempt to log in with it.
+            _logger.LogInformation("Personal access token available. Attempting to login...");
+            Status = "Token available. Logging in...";
+            AuthenticationResult tokenResult = await _authorizationService.AuthenticateWithPersonalAccessTokenAsync(token);
+            if (!tokenResult.AuthenticationSuccessful)
+            {
+                // token was invalid
+                _logger.LogInformation("Personal access token was invalid.");
+                _IsAuthenticated = false;
+
+                // clear token.
+                _logger.LogInformation("Clearing Personal access token...");
+                await _settingsService.ClearPersonalAccessTokenAsync();
+                return false;
+            }
+
+            return true;
+        }
+
 
         #endregion Methods
 

@@ -15,6 +15,10 @@ namespace GitHubCompanion.ViewModels
         private readonly IAuthorizationService _authorizationService;
         private readonly ISettingsService _settingsService;
 
+        // locals
+        private string _clientId = "My Client ID";
+        private string _clientSecret = "My Client Secret";
+
         public enum Modes
         {
             Login,
@@ -47,6 +51,18 @@ namespace GitHubCompanion.ViewModels
         #endregion Messages
 
         #region Properties
+
+        private string UseablePassword
+        {
+            get
+            {
+                string password = null;
+                if (SecurePassword != null && SecurePassword.Length > 0) password = SecurePassword.ConvertToUnsecureString();
+                if (!String.IsNullOrWhiteSpace(Password)) password = Password;
+
+                return password;
+            }
+        }
 
         #region Username
 
@@ -103,6 +119,17 @@ namespace GitHubCompanion.ViewModels
 
         #endregion IsAuthenticationCodeRequired
 
+        #region IsCreatingToken
+
+        private bool _IsCreatingToken;
+        public bool IsCreatingToken
+        {
+            get { return _IsCreatingToken; }
+            private set { _IsCreatingToken = value; OnPropertyChanged(); }
+        }
+
+        #endregion IsCreatingToken
+
         #endregion Properties
 
         #region Commands
@@ -121,8 +148,9 @@ namespace GitHubCompanion.ViewModels
 
         protected virtual async void LoginExecute()
         {
-            await PerformLoginAsync();
-
+            bool isSuccessful = await PerformLoginAsync();
+            if (isSuccessful) isSuccessful = await PerformCreateTokenAsync();
+            if (isSuccessful) await _navigationService.NavigateToAsync<HomeViewModel>(addtoStack: false);
         }
 
         protected virtual bool CanLoginExecute()
@@ -170,17 +198,11 @@ namespace GitHubCompanion.ViewModels
 
         #region Methods
 
-
-        private async Task PerformLoginAsync()
+        private async Task<bool> PerformLoginAsync()
         {
-
-            string password = null;
-            if (SecurePassword != null && SecurePassword.Length > 0) password = SecurePassword.ConvertToUnsecureString();
-            if (!String.IsNullOrWhiteSpace(Password)) password = Password;
-
             Status = "Attempting to authenticate...";
             _logger.LogInformation("Attempting to authenticate...");
-            AuthenticationResult authenticationResult = await _authorizationService.AuthenticateAsync(Username, password, AuthenticationCode);
+            AuthenticationResult authenticationResult = await _authorizationService.AuthenticateAsync(Username, UseablePassword, AuthenticationCode);
 
             // Authentication passed, move to home page.
             if (authenticationResult.AuthenticationSuccessful)
@@ -190,8 +212,7 @@ namespace GitHubCompanion.ViewModels
                 await Task.Delay(1000);
 
                 _logger.LogInformation("Navigating to Home.");
-                await _navigationService.NavigateToAsync<HomeViewModel>(addtoStack: false);
-                return;
+                return true;
             }
 
             // Authentication failed. 
@@ -216,24 +237,42 @@ namespace GitHubCompanion.ViewModels
                         break;
                 }
 
-                return;
+                return false;
             }
 
             // If we get here, all options were exhausted. 
             // Either the user did not enter the correct credentials, 
             // or there is an unknown problem with their account.
             Status = "Could not authenticate with GitHub. Please be sure you have valid credentials, and that there is nothing wrong with your GitHub account.";
+            return false;
         }
 
-        private Task PerformLoginWithAuthenticationCodeAsync()
+        private async Task<bool> PerformCreateTokenAsync()
         {
-            string password = null;
-            if (SecurePassword != null && SecurePassword.Length > 0) password = SecurePassword.ConvertToUnsecureString();
-            if (!String.IsNullOrWhiteSpace(Password)) password = Password;
+            try
+            {
+                _logger.LogInformation("Creating token with user and repo permissions.");
+                Status = "Attempting to create a token...";
 
-            return Task.CompletedTask;
+                var response = await _authorizationService.CreateAuthorizationTokenForAppAsync(new AuthorizeParameters()
+                {
+                    Client_Id = _clientId,
+                    Client_Secret = _clientSecret,
+                    Note = "GitHub Companion Note",
+                    Scopes = new string[] { "user", "repo" }
+                }, Username, UseablePassword, AuthenticationCode);
+
+                await _settingsService.SetTokenAsync(response.Response.Hashed_Token);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Status = "There was an error creating the token:" + ex.Message;
+                _logger.LogError(ex, "Creating Token");
+                return false;
+            }
         }
-
 
         #endregion Methods
 

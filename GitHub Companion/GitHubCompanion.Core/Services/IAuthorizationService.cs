@@ -11,8 +11,13 @@ namespace GitHubCompanion.Services
 
     public class AuthorizeParameters
     {
+        public AuthorizeParameters()
+        {
+            Scopes = new string[] { "user", "repos" };
+        }
+
         /// <summary>
-        /// A list of scopes that this authorization is in.
+        /// A list of scopes that this authorization is in. Defaults to user and repos.
         /// </summary>
         public IEnumerable<string> Scopes { get; set; }
 
@@ -43,7 +48,7 @@ namespace GitHubCompanion.Services
         /// <summary>
         /// A unique string to distinguish an authorization from others created for the same client ID and user.
         /// </summary>
-        public string FingerPrint { get; set; }
+        public string Fingerprint { get; set; }
     }
 
     #endregion Parameters
@@ -71,6 +76,13 @@ namespace GitHubCompanion.Services
         /// <returns>True if authentication is successful; Otherwise, false.</returns>
         Task<AuthenticationResult> AuthenticateWithTokenAsync(string token);
 
+        /// <summary>
+        /// Authenticates with a token.
+        /// </summary>
+        /// <param name="token">Required. A string representing a token.</param>
+        /// <returns>True if authentication is successful; Otherwise, false.</returns>
+        Task<AuthenticationResult> AuthenticateWithPersonalAccessTokenAsync(string personalAccessToken);
+
 
         /// <summary>
         /// Creates authorizations for a user.
@@ -81,10 +93,9 @@ namespace GitHubCompanion.Services
         /// Optional. The Two factor authentication code. 
         /// If the two factor authentication code is unknown, leave blank, and the result to have two factor flag with the method.
         /// </param>
-        /// <param name="parameters">Optional. The parameters for the authorization. Defaults to user and repos.</param>
-        /// <
+        /// <param name="parameters">Required. The parameters for the authorization.</param>
         /// <returns></returns>
-        Task<GitHubResponse<Authorization>> CreateAuthorizationAsync(string username, string password, int? TwoFactorAuthorizationCode = null, AuthorizeParameters parameters = null);
+        Task<GitHubResponse<Authorization>> CreateAuthorizationTokenForAppAsync(AuthorizeParameters parameters, string username, string password, string TwoFactorAuthorizationCode = null);
 
     }
 }

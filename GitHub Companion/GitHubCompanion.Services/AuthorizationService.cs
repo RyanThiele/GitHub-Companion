@@ -37,6 +37,29 @@ namespace GitHubCompanion.Services
 
         }
 
+        public async Task<AuthenticationResult> AuthenticateWithPersonalAccessTokenAsync(string personalAccessToken)
+        {
+            AuthenticationResult result = new AuthenticationResult();
+
+            using (HttpClient client = CreateHttpClient())
+            {
+                // create a basic auth header.
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", personalAccessToken);
+
+
+                // get content.
+                HttpResponseMessage responseMessage = await client.GetAsync("https://api.github.com");
+                if (responseMessage.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    Models.Headers.GitHubHeaders headers = new Models.Headers.GitHubHeaders(responseMessage.Headers);
+                    return new AuthenticationResult() { OptionHeader = headers.GitHubOptionHeader };
+                }
+
+                responseMessage.EnsureSuccessStatusCode();
+                return new AuthenticationResult() { AuthenticationSuccessful = true };
+            }
+        }
+
         public async Task<AuthenticationResult> AuthenticateWithTokenAsync(string token)
         {
             AuthenticationResult result = new AuthenticationResult();
@@ -44,7 +67,7 @@ namespace GitHubCompanion.Services
             using (HttpClient client = CreateHttpClient())
             {
                 // create a basic auth header.
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                client.DefaultRequestHeaders.Add("token", token);
 
 
                 // get content.
@@ -61,7 +84,7 @@ namespace GitHubCompanion.Services
 
         }
 
-        public async Task<GitHubResponse<Authorization>> CreateAuthorizationAsync(string username, string password, int? TwoFactorAuthorizationCode = null, AuthorizeParameters parameters = null)
+        public async Task<GitHubResponse<Authorization>> CreateAuthorizationTokenForAppAsync(AuthorizeParameters parameters, string username, string password, string twoFactorAuthorizationCode = null)
         {
             GitHubResponse<Authorization> response = new GitHubResponse<Authorization>();
 
@@ -69,15 +92,21 @@ namespace GitHubCompanion.Services
             {
                 // create a basic auth header.
                 byte[] authroizationHeader = Encoding.ASCII.GetBytes($"{username}:{password}");
-                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(authroizationHeader));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(authroizationHeader));
 
-                if (TwoFactorAuthorizationCode.HasValue) client.DefaultRequestHeaders.Add("X-GitHub-OTP", TwoFactorAuthorizationCode.Value.ToString());
+                if (!String.IsNullOrWhiteSpace(twoFactorAuthorizationCode)) client.DefaultRequestHeaders.Add("X-GitHub-OTP", twoFactorAuthorizationCode);
 
+                string requestUri = $"https://api.github.com/authorizations/clients/{parameters.Client_Id}";
                 // post content.
-                HttpResponseMessage responseMessage = await client.PostAsJsonAsync("https://api.github.com/authorizations", parameters);
+                HttpResponseMessage responseMessage = await client.PutAsJsonAsync(requestUri, new
+                {
+                    client_secret = parameters.Client_Secret,
+                    scopes = parameters.Scopes
+                });
+
                 if (responseMessage.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    response.Headers = new Models.Headers.GitHubHeaders(responseMessage.Headers);
+                    response.Headers = new GitHubHeaders(responseMessage.Headers);
                     return response;
                 }
 
