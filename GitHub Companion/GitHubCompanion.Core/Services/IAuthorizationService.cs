@@ -64,7 +64,14 @@ namespace GitHubCompanion.Services
         /// <returns>The result of the authentication request.</returns>
         Task<AuthenticationResult> AuthenticateAsync(string username, string password, string tfaCode = null);
 
-        Task<bool> AuthorizeWithTokenAsync(string token);
+        /// <summary>
+        /// Authenticates with a token.
+        /// </summary>
+        /// <param name="token">Required. A string representing a token.</param>
+        /// <returns>True if authentication is successful; Otherwise, false.</returns>
+        Task<AuthenticationResult> AuthenticateWithTokenAsync(string token);
+
+
         /// <summary>
         /// Creates authorizations for a user.
         /// </summary>

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GitHubCompanion.ViewModels
 {
-    public class LoginViewModel : ViewModelBase
+    public class LoginWithCredentialsViewModel : ViewModelBase
     {
         private readonly ILogger _logger;
         private readonly INavigationService _navigationService;
@@ -25,12 +25,12 @@ namespace GitHubCompanion.ViewModels
 
         #region Constructors
 
-        public LoginViewModel()
+        public LoginWithCredentialsViewModel()
         {
 
         }
 
-        public LoginViewModel(ILogger<LoginViewModel> logger,
+        public LoginWithCredentialsViewModel(ILogger<LoginWithCredentialsViewModel> logger,
             INavigationService navigationService,
             IAuthorizationService authorizationService,
             ISettingsService settingsService)
@@ -183,7 +183,7 @@ namespace GitHubCompanion.ViewModels
             AuthenticationResult authenticationResult = await _authorizationService.AuthenticateAsync(Username, password, AuthenticationCode);
 
             // Authentication passed, move to home page.
-            if (authenticationResult.AuthentictionSuccessful)
+            if (authenticationResult.AuthenticationSuccessful)
             {
                 Status = "Authentication was successful.";
                 _logger.LogInformation("Authentication was successful.");

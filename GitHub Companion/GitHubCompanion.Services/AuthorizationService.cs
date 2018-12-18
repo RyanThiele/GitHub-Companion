@@ -1,6 +1,8 @@
 ﻿using GitHubCompanion.Models;
+using GitHubCompanion.Models.Headers;
 using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,12 +18,36 @@ namespace GitHubCompanion.Services
             {
                 // create a basic auth header.
                 byte[] authroizationHeader = Encoding.ASCII.GetBytes($"{username}:{password}");
-                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(authroizationHeader));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(authroizationHeader));
 
                 // do we have a tfa code?
                 if (!String.IsNullOrWhiteSpace(tfaCode)) client.DefaultRequestHeaders.Add("X-GitHub-OTP", tfaCode);
 
-                // post content.
+                // get content.
+                HttpResponseMessage responseMessage = await client.GetAsync("https://api.github.com");
+                if (responseMessage.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    GitHubHeaders headers = new GitHubHeaders(responseMessage.Headers);
+                    return new AuthenticationResult() { OptionHeader = headers.GitHubOptionHeader };
+                }
+
+                responseMessage.EnsureSuccessStatusCode();
+                return new AuthenticationResult() { AuthenticationSuccessful = true };
+            }
+
+        }
+
+        public async Task<AuthenticationResult> AuthenticateWithTokenAsync(string token)
+        {
+            AuthenticationResult result = new AuthenticationResult();
+
+            using (HttpClient client = CreateHttpClient())
+            {
+                // create a basic auth header.
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+
+                // get content.
                 HttpResponseMessage responseMessage = await client.GetAsync("https://api.github.com");
                 if (responseMessage.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
@@ -30,7 +56,7 @@ namespace GitHubCompanion.Services
                 }
 
                 responseMessage.EnsureSuccessStatusCode();
-                return new AuthenticationResult() { AuthentictionSuccessful = true };
+                return new AuthenticationResult() { AuthenticationSuccessful = true };
             }
 
         }
@@ -62,9 +88,6 @@ namespace GitHubCompanion.Services
 
         }
 
-        Task<bool> IAuthorizationService.AuthorizeWithTokenAsync(string token)
-        {
-            throw new NotImplementedException();
-        }
+
     }
 }
