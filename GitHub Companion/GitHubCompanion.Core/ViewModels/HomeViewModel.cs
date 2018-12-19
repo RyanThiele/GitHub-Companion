@@ -55,6 +55,7 @@ namespace GitHubCompanion.ViewModels
                 OnPropertyChanged();
                 LoginWithCredentialsCommand.OnCanExecuteChanged();
                 LoginWithTokenCommand.OnCanExecuteChanged();
+                SignOutCommand.OnCanExecuteChanged();
             }
         }
 
@@ -118,9 +119,11 @@ namespace GitHubCompanion.ViewModels
             }
         }
 
-        protected virtual void SignOutExecute()
+        protected virtual async void SignOutExecute()
         {
-            // logic when the command is executed.
+            await _settingsService.ClearTokenAsync();
+            await _settingsService.ClearPersonalAccessTokenAsync();
+            await PrepareViewModelAsync();
         }
 
         protected virtual bool CanSignOutExecute() { return IsAuthenticated; }

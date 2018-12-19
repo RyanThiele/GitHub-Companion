@@ -259,7 +259,16 @@ namespace GitHubCompanion.ViewModels
                     Client_Id = _clientId,
                     Client_Secret = _clientSecret,
                     Note = "GitHub Companion Note",
-                    Scopes = new string[] { "user", "repo" }
+                    Scopes = new string[] {
+                    "user",
+                    "public_repo",
+                    "repo",
+                    "repo_deployment",
+                    "repo:status",
+                    "read:repo_hook",
+                    "read:org",
+                    "read:public_key",
+                    "read:gpg_key" }
                 }, Username, UseablePassword, AuthenticationCode);
 
                 await _settingsService.SetTokenAsync(response.Response.Hashed_Token);
