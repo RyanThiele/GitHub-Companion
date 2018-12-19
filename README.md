@@ -1,8 +1,7 @@
 # GitHub-Companion
 A GitHub companion written in c# for various platforms.
 
-Pull-Reqest Validation:
-[![Pull Request Status](https://dynamensions.visualstudio.com/GitHub%20Companion/_apis/build/status/GitHub%20Companion-Universal%20Windows%20Platform-CI)](https://dynamensions.visualstudio.com/GitHub%20Companion/_build/latest?definitionId=18)
+[![Build Status](https://dynamensions.visualstudio.com/GitHub%20Companion/_apis/build/status/GitHub%20Companion-Universal%20Windows%20Platform-CI)](https://dynamensions.visualstudio.com/GitHub%20Companion/_build/latest?definitionId=18)
 
 ## At the moment
 I am creating the wrapper for the API (note: the API v4 is online and uses a different format. Please be aware when extending the project).
