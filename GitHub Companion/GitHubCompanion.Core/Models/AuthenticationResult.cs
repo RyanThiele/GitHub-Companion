@@ -8,7 +8,7 @@
         /// <summary>
         /// Read only. True if authentication successful; Otherwise false.
         /// </summary>
-        public bool AuthentictionSuccessful { get; set; }
+        public bool AuthenticationSuccessful { get; set; }
 
         /// <summary>
         /// Read Only. Null if there is no information; Otherwise, it will contain information for two-factor authentication (2fa)

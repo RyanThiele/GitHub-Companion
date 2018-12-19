@@ -7,7 +7,7 @@ namespace GitHubCompanion.Tests.Services
     public class VariousServiceTests
     {
 
-        [Fact]
+        [Fact(Skip = "Integration tests are not supported in automated build. PLease run manually.")]
         public async Task GetZen_ShouldReturnZen()
         {
             VariousService variousService = new VariousService();

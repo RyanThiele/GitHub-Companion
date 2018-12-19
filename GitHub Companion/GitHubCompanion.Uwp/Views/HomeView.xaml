@@ -9,6 +9,6 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-
+        <Button Command="{Binding LoginWithCredentialsCommand}">Login With Credentials</Button>
     </Grid>
 </Page>

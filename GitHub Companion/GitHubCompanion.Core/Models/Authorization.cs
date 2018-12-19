@@ -11,7 +11,7 @@ namespace GitHubCompanion.Models
         public Application App { get; set; }
         public string Token { get; set; }
         public string Hashed_Token { get; set; }
-        public long Token_Last_Eight { get; set; }
+        public string Token_Last_Eight { get; set; }
         public string Note { get; set; }
         public Uri Note_Url { get; set; }
 

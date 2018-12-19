@@ -40,7 +40,7 @@ namespace GitHubCompanion.Uwp
 
             // ViewModels
             serviceDescriptors.AddTransient<HomeViewModel>();
-            serviceDescriptors.AddTransient<LoginViewModel>();
+            serviceDescriptors.AddTransient<LoginWithCredentialsViewModel>();
 
             // build
             ServiceProvider = serviceDescriptors.BuildServiceProvider();

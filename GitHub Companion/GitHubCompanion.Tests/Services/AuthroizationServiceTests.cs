@@ -8,20 +8,20 @@ namespace GitHubCompanion.Tests.Services
 {
     public class AuthroizationServiceTests
     {
-        [Theory]
+        [Theory(Skip = "Integration tests are not supported in automated build. PLease run manually.")]
         [MemberData(nameof(DataSource.AuthorizeTestData), MemberType = typeof(DataSource))]
-        public async Task CreateAuthorizations(int currentRow, string username, string password)
+        public async Task CreateAuthorizationTokenForAppAsync(int currentRow, string username, string password)
         {
             AuthorizationService service = new AuthorizationService();
-            GitHubResponse<Authorization> result = await service.CreateAuthorizationAsync(
-                username,
-                password,
-                parameters: new AuthorizeParameters()
+            GitHubResponse<Authorization> result = await service.CreateAuthorizationTokenForAppAsync(
+                new AuthorizeParameters()
                 {
                     Scopes = new List<string>() { "user", "repo" },
-                    Note = $"Test Auth" + currentRow,
-                    FingerPrint = currentRow.ToString()
-                });
+                    Note = $"Test Auth" + currentRow
+                },
+                username,
+                password);
+
 
             Assert.NotNull(result);
             Assert.NotNull(result.Headers);

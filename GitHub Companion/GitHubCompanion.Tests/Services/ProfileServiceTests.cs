@@ -7,7 +7,7 @@ namespace GitHubCompanion.Tests.Services
 {
     public class ProfileServiceTests
     {
-        [Fact]
+        [Fact(Skip = "Integration tests are not supported in automated build. PLease run manually.")]
         public async Task GetUserProfileTest()
         {
             ProfileService service = new ProfileService();
