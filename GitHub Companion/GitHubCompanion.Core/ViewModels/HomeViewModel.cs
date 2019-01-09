@@ -209,6 +209,10 @@ namespace GitHubCompanion.ViewModels
             return true;
         }
 
+        private async Task GetSelfProfileInformationAsync(string token)
+        {
+
+        }
 
         #endregion Methods
 
