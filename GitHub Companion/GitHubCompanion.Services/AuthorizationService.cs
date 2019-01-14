@@ -46,12 +46,11 @@ namespace GitHubCompanion.Services
                 // create a basic auth header.
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", personalAccessToken);
 
-
                 // get content.
                 HttpResponseMessage responseMessage = await client.GetAsync("https://api.github.com");
                 if (responseMessage.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    Models.Headers.GitHubHeaders headers = new Models.Headers.GitHubHeaders(responseMessage.Headers);
+                    GitHubHeaders headers = new GitHubHeaders(responseMessage.Headers);
                     return new AuthenticationResult() { OptionHeader = headers.GitHubOptionHeader };
                 }
 
@@ -74,7 +73,7 @@ namespace GitHubCompanion.Services
                 HttpResponseMessage responseMessage = await client.GetAsync("https://api.github.com");
                 if (responseMessage.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    Models.Headers.GitHubHeaders headers = new Models.Headers.GitHubHeaders(responseMessage.Headers);
+                    GitHubHeaders headers = new GitHubHeaders(responseMessage.Headers);
                     return new AuthenticationResult() { OptionHeader = headers.GitHubOptionHeader };
                 }
 

@@ -10,11 +10,15 @@ namespace GitHubCompanion.ViewModels
 {
     public class HomeViewModel : ViewModelBase
     {
+        // services
         private readonly ILogger _logger;
         private readonly INavigationService _navigationService;
         private readonly ISettingsService _settingsService;
         private readonly IAuthorizationService _authorizationService;
         private readonly IProfileService _profileService;
+
+        // locals
+        private GitHubToken _token;
 
         #region Constructors
 
@@ -121,8 +125,8 @@ namespace GitHubCompanion.ViewModels
 
         protected virtual async void SignOutExecute()
         {
-            await _settingsService.ClearTokenAsync();
-            await _settingsService.ClearPersonalAccessTokenAsync();
+            await _settingsService.ClearTokenAsync(TokenTypes.AuthorizationToken);
+            await _settingsService.ClearTokenAsync(TokenTypes.PersonalAccessToken);
             await PrepareViewModelAsync();
         }
 
@@ -139,7 +143,7 @@ namespace GitHubCompanion.ViewModels
             try
             {
                 IsAuthenticated = await PerformAuthenticateWithTokenAsync();
-                if (!IsAuthenticated) await PerformAuthenticateWithPersonalAccessTokenAsync();
+                if (!IsAuthenticated) IsAuthenticated = await PerformAuthenticateWithPersonalAccessTokenAsync();
             }
             catch (Exception ex)
             {
@@ -151,8 +155,8 @@ namespace GitHubCompanion.ViewModels
         {
             // check to see if we have a token.
             _logger.LogDebug("Getting token...");
-            string token = await _settingsService.GetTokenAsync();
-            if (String.IsNullOrWhiteSpace(token))
+            _token = await _settingsService.GetTokenAsync(TokenTypes.AuthorizationToken);
+            if (_token == null || !_token.IsValid)
             {
                 _logger.LogError("No token available.");
                 IsAuthenticated = false;
@@ -162,7 +166,7 @@ namespace GitHubCompanion.ViewModels
             // token is available, attempt to log in with it.
             _logger.LogInformation("Token available. Attempting to login...");
             Status = "Token available. Logging in...";
-            AuthenticationResult tokenResult = await _authorizationService.AuthenticateWithTokenAsync(token);
+            AuthenticationResult tokenResult = await _authorizationService.AuthenticateWithTokenAsync(_token.Token);
             if (!tokenResult.AuthenticationSuccessful)
             {
                 // token was invalid
@@ -171,7 +175,7 @@ namespace GitHubCompanion.ViewModels
 
                 // clear token.
                 _logger.LogInformation("Clearing Token...");
-                await _settingsService.ClearTokenAsync();
+                await _settingsService.ClearTokenAsync(TokenTypes.AuthorizationToken);
                 return false;
             }
 
@@ -181,9 +185,9 @@ namespace GitHubCompanion.ViewModels
         private async Task<bool> PerformAuthenticateWithPersonalAccessTokenAsync()
         {
             // check to see if we have a token.
-            _logger.LogDebug("Getting pesonal access token...");
-            string token = await _settingsService.GetPersonalAccessTokenAsync();
-            if (String.IsNullOrWhiteSpace(token))
+            _logger.LogDebug("Getting personal access token...");
+            _token = await _settingsService.GetTokenAsync(TokenTypes.PersonalAccessToken);
+            if (_token == null || !_token.IsValid)
             {
                 _logger.LogError("No personal token available.");
                 IsAuthenticated = false;
@@ -193,7 +197,7 @@ namespace GitHubCompanion.ViewModels
             // token is available, attempt to log in with it.
             _logger.LogInformation("Personal access token available. Attempting to login...");
             Status = "Token available. Logging in...";
-            AuthenticationResult tokenResult = await _authorizationService.AuthenticateWithPersonalAccessTokenAsync(token);
+            AuthenticationResult tokenResult = await _authorizationService.AuthenticateWithPersonalAccessTokenAsync(_token.Token);
             if (!tokenResult.AuthenticationSuccessful)
             {
                 // token was invalid
@@ -202,7 +206,7 @@ namespace GitHubCompanion.ViewModels
 
                 // clear token.
                 _logger.LogInformation("Clearing Personal access token...");
-                await _settingsService.ClearPersonalAccessTokenAsync();
+                await _settingsService.ClearTokenAsync(TokenTypes.PersonalAccessToken);
                 return false;
             }
 
@@ -211,6 +215,8 @@ namespace GitHubCompanion.ViewModels
 
         private async Task GetSelfProfileInformationAsync(string token)
         {
+            _logger.LogInformation("Getting profile information...");
+            var profile = _profileService.GetSelfProfileAsync(token);
 
         }
 

@@ -271,7 +271,7 @@ namespace GitHubCompanion.ViewModels
                     "read:gpg_key" }
                 }, Username, UseablePassword, AuthenticationCode);
 
-                await _settingsService.SetTokenAsync(response.Response.Hashed_Token);
+                await _settingsService.SetTokenAsync(new GitHubToken(response.Response.Hashed_Token, TokenTypes.AuthorizationToken));
 
                 return true;
             }

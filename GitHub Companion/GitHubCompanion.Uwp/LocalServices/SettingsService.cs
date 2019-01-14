@@ -1,4 +1,6 @@
-﻿using GitHubCompanion.Services;
+﻿using GitHubCompanion.Models;
+using GitHubCompanion.Services;
+using System;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -6,7 +8,7 @@ namespace GitHubCompanion.Uwp.LocalServices
 {
     class SettingsService : ISettingsService
     {
-        private const string TOKEN_KEY = "Token";
+        private const string AUTHORIZATION_TOKEN_KEY = "Token";
         private const string PERSONAL_ACCESS_TOKEN_KEY = "Personal Access Token";
 
         #region Helpers
@@ -17,7 +19,7 @@ namespace GitHubCompanion.Uwp.LocalServices
             return (T)(await Task.FromResult(settings.Values[key]));
         }
 
-        private async Task<bool> SetSettingAsync(string key, object value)
+        private async Task<bool> SetSettingAsync<T>(string key, T value)
         {
             return await Task.FromResult(SetValue(key, value));
         }
@@ -28,51 +30,60 @@ namespace GitHubCompanion.Uwp.LocalServices
             return await Task.FromResult(settings.Values.Remove(key));
         }
 
-        private bool SetValue(string key, object value)
+        private bool SetValue<T>(string key, T value)
         {
-            var settings = ApplicationData.Current.LocalSettings;
-            var existingValue = settings.Values["Token"];
+            GitHubToken token = value as GitHubToken;
+            ValidateToken(token);
+
+            // gather data.
+            string tokenKey = GetTokenKeyFromTokenType(token.TokenType);
+            ApplicationDataContainer settings = ApplicationData.Current.LocalSettings;
+            object existingValue = settings.Values[tokenKey];
+
+            // set data.
             if (existingValue == null)
-            {
                 settings.Values.Add(key, value);
-            }
             else
-            {
                 settings.Values[key] = value;
-            }
+
             return true;
         }
 
+        private void ValidateToken(GitHubToken token)
+        {
+            if (token == null) throw new ApplicationException("Token cannot be null.");
+            if (!token.IsValid) throw new ApplicationException("Token is not valid and cannot be saved.");
+        }
+
+        private string GetTokenKeyFromTokenType(TokenTypes tokenType)
+        {
+            switch (tokenType)
+            {
+                case TokenTypes.AuthorizationToken:
+                    return AUTHORIZATION_TOKEN_KEY;
+                case TokenTypes.PersonalAccessToken:
+                    return PERSONAL_ACCESS_TOKEN_KEY;
+                default:
+                    throw new ApplicationException("Unknown token type.");
+            }
+        }
+
+
         #endregion Helpers
 
-        public Task<bool> ClearTokenAsync()
+        public Task<bool> ClearTokenAsync(TokenTypes tokenType)
         {
-            return ClearSettingAsync(TOKEN_KEY);
+            return ClearSettingAsync(GetTokenKeyFromTokenType(tokenType));
         }
 
-        public Task<string> GetTokenAsync()
+        public Task<GitHubToken> GetTokenAsync(TokenTypes tokenType)
         {
-            return GetSettingAsync<string>(TOKEN_KEY);
+            return GetSettingAsync<GitHubToken>(GetTokenKeyFromTokenType(tokenType));
         }
 
-        public Task<bool> SetTokenAsync(string token)
+        public Task<bool> SetTokenAsync(GitHubToken token)
         {
-            return SetSettingAsync(TOKEN_KEY, token);
-        }
-
-        public Task<string> GetPersonalAccessTokenAsync()
-        {
-            return GetSettingAsync<string>(PERSONAL_ACCESS_TOKEN_KEY);
-        }
-
-        public Task<bool> SetPersonalAccessTokenAsync(string personalAccessToken)
-        {
-            return SetSettingAsync(PERSONAL_ACCESS_TOKEN_KEY, personalAccessToken);
-        }
-
-        public Task<bool> ClearPersonalAccessTokenAsync()
-        {
-            return ClearSettingAsync(PERSONAL_ACCESS_TOKEN_KEY);
+            return SetSettingAsync(GetTokenKeyFromTokenType(token.TokenType), token);
         }
     }
 }
