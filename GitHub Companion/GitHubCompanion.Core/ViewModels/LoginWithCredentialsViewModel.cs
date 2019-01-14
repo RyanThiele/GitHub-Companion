@@ -16,8 +16,8 @@ namespace GitHubCompanion.ViewModels
         private readonly ISettingsService _settingsService;
 
         // locals
-        private string _clientId = "My Client ID";
-        private string _clientSecret = "My Client Secret";
+        private string _clientId = "798e0a04a1094a932a93";
+        private string _clientSecret = "32507f0f42a90685cbf9626a001ab6be95ef709b";
 
         public enum Modes
         {
@@ -271,7 +271,7 @@ namespace GitHubCompanion.ViewModels
                     "read:gpg_key" }
                 }, Username, UseablePassword, AuthenticationCode);
 
-                await _settingsService.SetTokenAsync(response.Response.Hashed_Token);
+                await _settingsService.SetTokenAsync(new GitHubToken(response.Response.Hashed_Token, TokenTypes.AuthorizationToken));
 
                 return true;
             }

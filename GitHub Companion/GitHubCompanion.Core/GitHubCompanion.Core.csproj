@@ -6,14 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Parameters\**" />
+    <EmbeddedResource Remove="Parameters\**" />
+    <None Remove="Parameters\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Dynamensions.Infrastructure.Base" Version="2.20180924.3" />
     <PackageReference Include="Dynamensions.Input.Commands" Version="2.20180924.3" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Parameters\" />
   </ItemGroup>
 
 </Project>

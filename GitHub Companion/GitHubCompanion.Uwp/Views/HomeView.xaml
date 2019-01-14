@@ -3,13 +3,32 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:GitHubCompanion.Uwp.Views"
+    xmlns:converters="using:GitHubCompanion.Uwp.Conveters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Page.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition  />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel HorizontalAlignment="Center" Margin="10" Orientation="Horizontal">
+            <Path Style="{StaticResource LogoPathStyle}" Fill="{ThemeResource SystemControlHighlightAltListAccentHighBrush}"/>
+            <TextBlock Style="{StaticResource HeaderTextBlockStyle}" VerticalAlignment="Center">GitHub Companion</TextBlock>
+        </StackPanel>
 
-    <StackPanel>
-        <Button Command="{Binding LoginWithCredentialsCommand}">Login With Credentials</Button>
-        <Button Command="{Binding SignOutCommand}">Sign Out</Button>
-    </StackPanel>
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Button Command="{Binding LoginWithCredentialsCommand}" Visibility="{Binding IsAuthenticated, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=True}" Width="300" Margin="10">Login With Credentials</Button>
+            <Button Command="{Binding SignOutCommand}" Visibility="{Binding IsAuthenticated, Converter={StaticResource BooleanToVisibilityConverter}}" Width="300" Margin="10">Sign Out</Button>
+        </StackPanel>
+
+        <Border Grid.Row="2" BorderBrush="{ThemeResource AppBarBorderThemeBrush}">
+            <TextBlock Text="{Binding Status}" Margin="10" >[Status]</TextBlock>
+        </Border>
+    </Grid>
 </Page>

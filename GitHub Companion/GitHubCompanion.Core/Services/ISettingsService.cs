@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using GitHubCompanion.Models;
+using System.Threading.Tasks;
 
 namespace GitHubCompanion.Services
 {
@@ -12,41 +13,25 @@ namespace GitHubCompanion.Services
     public interface ISettingsService
     {
         /// <summary>
-        /// Gets the token used for authenticated calls to the API.
+        /// Gets the <see cref="GitHubToken"/> used for authenticated calls to the API.
         /// </summary>
+        /// <param name="tokenType">The <see cref="TokenTypes"/> type of token.</param>
         /// <returns>A token string, if one exists.</returns>
-        Task<string> GetPersonalAccessTokenAsync();
+        Task<GitHubToken> GetTokenAsync(TokenTypes tokenType);
 
         /// <summary>
-        /// Sets the token used for authenticated calls to the API.
+        /// Sets the <see cref="GitHubToken"/> used for authenticated calls to the API.
         /// </summary>
+        /// <param name="tokenType">The <see cref="TokenTypes"/> type of token.</param>
         /// <returns>True is set was successful; Otherwise, false.</returns>
         /// <param name="token">The token to set.</param>
-        Task<bool> SetPersonalAccessTokenAsync(string personalAccessToken);
+        Task<bool> SetTokenAsync(GitHubToken gitHubToken);
 
         /// <summary>
-        /// Clears/Resets the token used for authenticated calls to the API.
+        /// Clears/Resets the <see cref="GitHubToken"/> used for authenticated calls to the API.
         /// </summary>
+        /// <param name="tokenType">The <see cref="TokenTypes"/> type of token.</param>
         /// <returns>True is set was successful; Otherwise, false.</returns>
-        Task<bool> ClearPersonalAccessTokenAsync();
-
-        /// <summary>
-        /// Gets the token used for authenticated calls to the API.
-        /// </summary>
-        /// <returns>A token string, if one exists.</returns>
-        Task<string> GetTokenAsync();
-
-        /// <summary>
-        /// Sets the token used for authenticated calls to the API.
-        /// </summary>
-        /// <returns>True is set was successful; Otherwise, false.</returns>
-        /// <param name="token">The token to set.</param>
-        Task<bool> SetTokenAsync(string token);
-
-        /// <summary>
-        /// Clears/Resets the token used for authenticated calls to the API.
-        /// </summary>
-        /// <returns>True is set was successful; Otherwise, false.</returns>
-        Task<bool> ClearTokenAsync();
+        Task<bool> ClearTokenAsync(TokenTypes tokenType);
     }
 }
