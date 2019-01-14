@@ -1,8 +1,7 @@
 # GitHub-Companion
 A GitHub companion written in c# for various platforms.
 
-Pull-Reqest Validation:
-[![Pull Request Status](https://dynamensions.visualstudio.com/GitHub%20Companion/_apis/build/status/GitHub%20Companion-Universal%20Windows%20Platform-CI)](https://dynamensions.visualstudio.com/GitHub%20Companion/_build/latest?definitionId=18)
+[![Build Status](https://dynamensions.visualstudio.com/GitHub%20Companion/_apis/build/status/GitHub%20Companion-Universal%20Windows%20Platform-CI)](https://dynamensions.visualstudio.com/GitHub%20Companion/_build/latest?definitionId=18)
 
 ## At the moment
 I am creating the wrapper for the API (note: the API v4 is online and uses a different format. Please be aware when extending the project).
@@ -22,7 +21,7 @@ After there is a foothold on the projects, there will be two more pipelines in p
 
 ## Contributing
 ### Setup
-There will be some data files that XUnit is using to test the service methods. All sensitive data files will have an extension of cvsd (*.cvsd). There is an entry in the gotnore file to ignore these extensions. Please use *.cvsd extensions when dealing with sensitive data (usernames, passwords, etc...).
+There will be some data files that XUnit is using to test the service methods. All sensitive data files will have an extension of cvsd (*.cvsd). There is an entry in the *.gitnore file to ignore these extensions. Please use *.cvsd extensions when dealing with sensitive data (usernames, passwords, etc...).
 
 ### Branching
 Currently there is a rule to protect the master branch. All changes and bug fixes must go through a pull request process. So be sure to branch from the master before pushing changes to the repository.
