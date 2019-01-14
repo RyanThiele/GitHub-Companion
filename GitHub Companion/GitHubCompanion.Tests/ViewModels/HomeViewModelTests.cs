@@ -102,7 +102,6 @@ namespace GitHubCompanion.ViewModels
             Assert.True(viewModel.LoginWithTokenCommand.CanExecute(null));
         }
 
-
         [Fact]
         public async Task ValidAuthorizationToken_TokenShouldSet_LoginShouldBeUnAvailable_SignoutShoudBeAvailable()
         {
@@ -137,14 +136,19 @@ namespace GitHubCompanion.ViewModels
         {
             // prepare
             GitHubToken token = new GitHubToken("I am a token", TokenTypes.PersonalAccessToken);
+
             var settingsService = new Mock<ISettingsService>();
             var authorizationService = new Mock<IAuthorizationService>();
+            var profileService = new Mock<IProfileService>();
 
             settingsService.Setup(x => x.GetTokenAsync(TokenTypes.PersonalAccessToken))
                 .Returns(Task.FromResult(token));
 
             authorizationService.Setup(x => x.AuthenticateWithPersonalAccessTokenAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult(new AuthenticationResult() { AuthenticationSuccessful = true }));
+
+            profileService.Setup(x => x.GetSelfProfileAsync(token.Token))
+               .Returns(Task.FromResult(new GitHubResponse<Profile>()));
 
             HomeViewModel viewModel = new HomeViewModel(new Mock<ILogger<HomeViewModel>>().Object,
                 new Mock<INavigationService>().Object,
@@ -160,7 +164,6 @@ namespace GitHubCompanion.ViewModels
             Assert.False(viewModel.LoginWithCredentialsCommand.CanExecute(null));
             Assert.False(viewModel.LoginWithTokenCommand.CanExecute(null));
         }
-
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GitHubCompanion.Models;
+using System;
 using System.Security;
 
 namespace GitHubCompanion
@@ -38,5 +39,15 @@ namespace GitHubCompanion
             return secureString;
         }
 
+        internal static void UpdateGlobals<T>(this GitHubResponse<T> response)
+        {
+            if (response == null || response.Headers == null) return;
+
+            lock (Globals.LockObject)
+            {
+                Globals.Api.RequestsLeft = response.Headers.RateLimitRemaining;
+                Globals.Api.ResetDateTime = response.Headers.RateLimitReset;
+            }
+        }
     }
 }

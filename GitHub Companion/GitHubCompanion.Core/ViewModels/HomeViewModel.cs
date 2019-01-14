@@ -65,6 +65,17 @@ namespace GitHubCompanion.ViewModels
 
         #endregion IsAuthenticated
 
+        #region Profile
+
+        private Profile _Profile;
+        public Profile Profile
+        {
+            get { return _Profile; }
+            set { _Profile = value; OnPropertyChanged(); }
+        }
+
+        #endregion Profile
+
         #endregion Properties
 
         #region Commands
@@ -142,8 +153,23 @@ namespace GitHubCompanion.ViewModels
         {
             try
             {
-                IsAuthenticated = await PerformAuthenticateWithTokenAsync();
-                if (!IsAuthenticated) IsAuthenticated = await PerformAuthenticateWithPersonalAccessTokenAsync();
+                if (Globals.Token == null)
+                {
+                    // are we authenticated?
+                    IsAuthenticated = await PerformAuthenticateWithTokenAsync();
+                    if (!IsAuthenticated) IsAuthenticated = await PerformAuthenticateWithPersonalAccessTokenAsync();
+                    if (!IsAuthenticated) return;
+
+                    // saver the token.
+                    Globals.Token = new GlobalProperty<GitHubToken>(_token);
+                }
+
+                if (Globals.Profile == null || Globals.Profile.LastUpdated < DateTime.Now.AddDays(1))
+                {
+                    Profile profile = await GetSelfProfileInformationAsync(_token.Token);
+                    Profile = profile;
+                    Globals.Profile = new GlobalProperty<Profile>(profile);
+                }
             }
             catch (Exception ex)
             {
@@ -213,11 +239,17 @@ namespace GitHubCompanion.ViewModels
             return true;
         }
 
-        private async Task GetSelfProfileInformationAsync(string token)
+        private async Task<Profile> GetSelfProfileInformationAsync(string token)
         {
             _logger.LogInformation("Getting profile information...");
-            var profile = _profileService.GetSelfProfileAsync(token);
+            GitHubResponse<Profile> response = await _profileService.GetSelfProfileAsync(token);
 
+            response.UpdateGlobals();
+
+            if (response == null)
+                return null;
+            else
+                return response.Response;
         }
 
         #endregion Methods
